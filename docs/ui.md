@@ -3,7 +3,7 @@
 La aplicación tendrá la siguientes pantallas
 
 - Se puede acceder al siguiente link para ver la aplicación interactiva
-https://www.figma.com/proto/poZmxMWWUmsVSpCaOJgoII/Untitled?node-id=3-360&t=xv3Eggo77UL4pDaL-1&scaling=scale-down&content-scaling=fixed&page-id=3%3A359&starting-point-node-id=62%3A1550
+https://www.figma.com/proto/poZmxMWWUmsVSpCaOJgoII/Rapikids?node-id=3-359&t=SSJ1agInqvKv0aG0-1
 
 1. Pantalla 1: Frame
 
