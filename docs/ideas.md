@@ -1,21 +1,25 @@
 # Ideas de proyecto
 
-## Idea 1
+## Idea 1 Rapikids
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Rapikids es una aplicación que permite buscar guarderías cercanas a la ubicación de la persona en la ciudad de Bogotá, la aplicación permite a los usuarios seleccionar, guarderías cercanas, horarios, costos y métodos de pago.
 
-Aplicaciones similares:
+Aplicaciones similares
 
-- ...
-- ...
-- ...
+- Kidizz https://kidizz.com/es/
+- LiveKid (méxico) https://livekid.com/mx/
+- KinderTap (EE.UU.) https://www.kindertap.com/en/
 
-## Idea 2
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+## Idea 2 Tarararan
 
-Aplicaciones similares:
+Tarararan es una aplicación que permite que el usuario busque el nombre de cualquier película, esta le mostrará si está en cartelera, los cines cercanos que la tienen disponible y los horarios de las funciones, el usuario podrá seleccionar filtros como fecha y hora, si no está en cartelera, le mostrará las aplicaciones que tienen esa película como (netflix, disney, etc).
 
-- ...
-- ...
-- ...
+Aplicaciones similares
+
+- Cinemark https://www.cinemark.com.co/cine-club?gad_source=1&gclid=CjwKCAiAh6y9BhBREiwApBLHC7KFMv7CXjwuLrzDmp6xSYjF3EEK0t0GGIoN0hoX9fakYCPorykxnBoCXJQQAvD_BwE
+- Cinépolis https://cinepolis.com.co/
+- Cine colombia https://www.cinecolombia.com/
+- Peliplus https://www19.pelisplushd.to/
+- Repelis https://repelishd.cam/
+
