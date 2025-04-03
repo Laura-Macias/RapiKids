@@ -1,4 +1,4 @@
-package com.example.rapikids.ui.theme
+package com.example.rapikids.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
