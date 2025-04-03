@@ -9,6 +9,7 @@ sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Login : Screen("login")
     object Register : Screen("register")
+    object Home : Screen("home")
 }
 
 @Composable
@@ -24,6 +25,9 @@ fun RapiKidsNavHost() {
         }
         composable(Screen.Register.route) {
             RegisterScreen(navController) //
+        }
+        composable(Screen.Home.route) {
+            HomeScreen(navController)
         }
     }
 }

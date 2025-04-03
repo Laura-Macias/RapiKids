@@ -23,7 +23,7 @@ fun RegisterScreen(navController: NavHostController) {
         OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Correo") })
         OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Contraseña") })
 
-        Button(onClick = { /* Lógica de registro */ }, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = {navController.navigate(Screen.Home.route)}, modifier = Modifier.fillMaxWidth()) {
             Text("Registrarse")
         }
 
