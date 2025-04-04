@@ -33,6 +33,14 @@ fun RapiKidsNavHost() {
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
 
+        composable(Screen.Menu.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                MenuScreen(navController, padding)
+            }
+        }
+
         composable(Screen.Home.route) {
             Scaffold(
                 topBar = { TopBar(navController) }
@@ -48,6 +56,7 @@ fun RapiKidsNavHost() {
             }
         }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 =======
@@ -58,6 +67,9 @@ fun RapiKidsNavHost() {
                 MenuScreen(padding, navController)
             }
         }
+=======
+
+>>>>>>> 7a58ac2 (se arregla la pagina menu)
         composable(Screen.Mensaje.route) {
             Scaffold(
                 topBar = { TopBar(navController) }

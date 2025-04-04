@@ -40,7 +40,7 @@ fun TopBar(navController: NavController) {
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate("menu") }) {
+            IconButton(onClick = { navController.navigate(Screen.Menu.route) }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_menu),
                     contentDescription = "Menú",
