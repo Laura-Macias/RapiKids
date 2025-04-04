@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.example.rapikids.ui.Screen
 import com.example.rapikids.ui.components.AutoPhotoCarousel
 
 
@@ -50,7 +51,7 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
 
 
                 Button(
-                    onClick = { },
+                    onClick = {navController.navigate(Screen.Reservas.route) },
                     modifier = Modifier
                         .width(300.dp)
                         .height(60.dp)
