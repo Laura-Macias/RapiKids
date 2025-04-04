@@ -11,8 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.rapikids.R // Asegúrate de tener R importado correctamente
+import com.example.rapikids.R
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -20,6 +21,7 @@ fun RegisterScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var termsChecked by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf("Ingresar") }
 
     Column(
         modifier = Modifier
@@ -31,29 +33,52 @@ fun RegisterScreen(navController: NavHostController) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.drawable.ic_hand_wave),
+                painter = painterResource(id = R.drawable.ic_hand_wave_register),
                 contentDescription = "User Icon",
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(56.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(15.dp))
             Text(
                 text = "Bienvenid@",
                 style = MaterialTheme.typography.headlineSmall
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
+
+
+        Spacer(modifier = Modifier.height(24.dp))
 
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            TextButton(onClick = { navController.navigate("login") }) {
-                Text("Ingresar", color = MaterialTheme.colorScheme.primary)
+            TextButton(
+                onClick = {
+                    selectedTab = "Ingresar"
+                    navController.navigate(Screen.Login.route)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Ingresar",
+                    color = if (selectedTab == "Ingresar") Color(0xFFD81B60) else Color.Gray,
+                    fontSize = 18.sp
+                )
             }
-            TextButton(onClick = { /* No es necesario en esta pantalla */ }) {
-                Text("Registrarse", color = MaterialTheme.colorScheme.secondary)
+            TextButton(
+                onClick = {
+                    selectedTab = "Registrarse"
+                    navController.navigate(Screen.Register.route)
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Registrarse",
+                    color = if (selectedTab == "Registrarse") Color(0xFFD81B60) else Color.Gray,
+                    fontSize = 18.sp
+                )
             }
         }
 
@@ -105,10 +130,10 @@ fun RegisterScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary), // Rosa fuerte
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)), // Rosa fuerte
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Registrarme", color = Color.White)
+            Text("Registarse", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -125,17 +150,17 @@ fun RegisterScreen(navController: NavHostController) {
             Image(
                 painter = painterResource(id = R.drawable.ic_facebook),
                 contentDescription = "Facebook Icon",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(42.dp)
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_email),
                 contentDescription = "Email Icon",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(42.dp)
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_instagram),
                 contentDescription = "Instagram Icon",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(42.dp)
             )
         }
     }
