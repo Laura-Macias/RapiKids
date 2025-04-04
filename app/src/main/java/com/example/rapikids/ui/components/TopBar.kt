@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.example.rapikids.ui.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +40,7 @@ fun TopBar(navController: NavController) {
             }
         },
         navigationIcon = {
-            IconButton(onClick = {  }) {
+            IconButton(onClick = { navController.navigate("menu") }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_menu),
                     contentDescription = "Menú",
