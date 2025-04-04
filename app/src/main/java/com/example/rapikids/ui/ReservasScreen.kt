@@ -11,11 +11,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.example.rapikids.ui.Screen
 import java.util.Calendar
 
 @Composable
-fun ReservasScreen(padding: PaddingValues) {
+fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
@@ -50,7 +52,7 @@ fun ReservasScreen(padding: PaddingValues) {
             },
             hour,
             minute,
-            true // 24-hour format
+            true
         )
     }
 
@@ -62,7 +64,7 @@ fun ReservasScreen(padding: PaddingValues) {
             },
             hour,
             minute,
-            true // 24-hour format
+            true
         )
     }
 
@@ -74,7 +76,6 @@ fun ReservasScreen(padding: PaddingValues) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Sección de selección de fecha
         Text(
             text = "Escoge la fecha de tu reserva",
             style = MaterialTheme.typography.headlineSmall,
@@ -95,7 +96,6 @@ fun ReservasScreen(padding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección de selección de servicio
         Text(
             text = "Que servicio deseas hoy",
             style = MaterialTheme.typography.headlineSmall,
@@ -132,7 +132,6 @@ fun ReservasScreen(padding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Valor de la hora
         Text(
             text = "Valor hora: $25.000",
             style = MaterialTheme.typography.bodyLarge,
@@ -141,7 +140,6 @@ fun ReservasScreen(padding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección de "Indica la hora"
         Text(
             text = "Indica la hora",
             style = MaterialTheme.typography.headlineSmall,
@@ -193,7 +191,7 @@ fun ReservasScreen(padding: PaddingValues) {
             Text("Ubicación actual")
         }
         Button(
-            onClick = {  },
+            onClick = { navController.navigate(Screen.ResumenServicio.route)},
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 16.dp)

@@ -6,11 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material3.*
 import com.example.rapikids.ui.components.TopBar
-import com.example.rapikids.ui.screens.GuardadoScreen
-import com.example.rapikids.ui.screens.HomeScreen
-import com.example.rapikids.ui.screens.MensajeScreen
-import com.example.rapikids.ui.screens.MenuScreen
-import com.example.rapikids.ui.screens.ReservasScreen
+import com.example.rapikids.ui.screens.*
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -18,13 +14,10 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object Home : Screen("home")
     object Reservas : Screen("reservas")
-<<<<<<< HEAD
-=======
     object ResumenServicio : Screen("resumenServicio")
     object Menu : Screen("menu")
     object Mensaje : Screen("mensaje")
     object Guardado : Screen("guardado")
->>>>>>> d285889 (se crea la pantalla Menu,Mensaje,guardado)
 }
 
 @Composable
@@ -48,28 +41,15 @@ fun RapiKidsNavHost() {
                 HomeScreen(navController, padding)
             }
         }
+
         composable(Screen.Reservas.route) {
             Scaffold(
                 topBar = { TopBar(navController) }
             ) { padding ->
-                ReservasScreen(padding)
+                ReservasScreen(navController, padding)
             }
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-
-=======
-        composable(Screen.Menu.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                MenuScreen(padding, navController)
-            }
-        }
-=======
-
->>>>>>> 7a58ac2 (se arregla la pagina menu)
         composable(Screen.Mensaje.route) {
             Scaffold(
                 topBar = { TopBar(navController) }
@@ -77,6 +57,7 @@ fun RapiKidsNavHost() {
                 MensajeScreen(padding)
             }
         }
+
         composable(Screen.Guardado.route) {
             Scaffold(
                 topBar = { TopBar(navController) }
@@ -84,13 +65,23 @@ fun RapiKidsNavHost() {
                 GuardadoScreen(padding, navController)
             }
         }
->>>>>>> d285889 (se crea la pantalla Menu,Mensaje,guardado)
+        composable(Screen.ResumenServicio.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                ResumenServicioScreen(navController, padding)
+            }
+        }
+
+
         composable(Screen.Splash.route) {
             SplashScreen(navController)
         }
+
         composable(Screen.Login.route) {
             LoginScreen(navController)
         }
+
         composable(Screen.Register.route) {
             RegisterScreen(navController)
         }
