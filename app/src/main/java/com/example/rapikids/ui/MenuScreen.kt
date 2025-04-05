@@ -28,12 +28,19 @@ fun MenuScreen(navController: NavController, padding: PaddingValues) {
         )
 
         Text(
-            text = "home",
+            text = "Reserva",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
-                .clickable { navController.navigate(Screen.Home.route)  }
+                .clickable { navController.navigate(Screen.Guardado.route)  }
                 .padding(8.dp)
         )
 
+        Text(
+            text = "chat",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .clickable { navController.navigate(Screen.Chat.route)  }
+                .padding(8.dp)
+        )
     }
 }

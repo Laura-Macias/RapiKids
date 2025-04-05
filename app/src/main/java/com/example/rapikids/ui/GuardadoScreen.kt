@@ -34,7 +34,7 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
             fontWeight = FontWeight.Bold
         )
 
-        // Tarjeta de reserva 1 (Pagada)
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,16 +74,16 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Ya se realizó el pago",
-                            color = Color(0xFF2E7D32), // Un tono de verde
+                            color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.SemiBold
                         )
                     }
-                    // No hay botón de pagar aquí
+
                 }
             }
         }
 
-        // Tarjeta de reserva 2 (Pendiente de pago)
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,16 +121,16 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.FavoriteBorder, contentDescription = "Favorito")
                         Spacer(modifier = Modifier.width(4.dp))
-                        // No se indica el estado de pago aquí visualmente como texto
+
                     }
-                    Button(onClick = { /* TODO: Implementar lógica de pagar */ }) {
+                    Button(onClick = {  }) {
                         Text(text = "Pagar")
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f)) // Empuja el mensaje hacia abajo
+        Spacer(modifier = Modifier.weight(1f))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -152,13 +152,4 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
         }
     }
 }
-@Preview(showBackground = true)
-@Composable
-fun GuardadoScreenPreview() {
-    RapiKidsTheme  {
-        GuardadoScreen(
-            padding = PaddingValues(0.dp),
-            navController = TODO()
-        )
-    }
-}
+
