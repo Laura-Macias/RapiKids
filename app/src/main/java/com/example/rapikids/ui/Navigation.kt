@@ -64,7 +64,7 @@ fun RapiKidsNavHost() {
             Scaffold(
                 topBar = { TopBar(navController) }
             ) { padding ->
-                MensajeScreen(padding)
+                MensajeScreen(navController = navController, padding = padding)
             }
         }
 

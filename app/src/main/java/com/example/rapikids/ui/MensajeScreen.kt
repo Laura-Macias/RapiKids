@@ -1,6 +1,7 @@
 package com.example.rapikids.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -10,10 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.example.rapikids.ui.Screen
 
 @Composable
-fun MensajeScreen(padding: PaddingValues) {
+fun MensajeScreen(navController: NavController, padding: PaddingValues) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -41,31 +44,37 @@ fun MensajeScreen(padding: PaddingValues) {
 
 
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Prof. Rosalba Cruz",
             message = "Guarderia Niños felices"
         )
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Prof. Ester Ruiz",
             message = "Guarderia Alegria"
         )
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Prof. Ester Ruiz",
             message = "Guarderia Alegria"
         )
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Team Unicorns",
             message = "last seen 45 minutes ago"
         )
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Team Unicorns",
             message = "last seen 45 minutes ago"
         )
         MessageItem(
+            navController = navController,
             profileImage = R.drawable.usuario,
             name = "Team Unicorns",
             message = "last seen 45 minutes ago"
@@ -74,11 +83,14 @@ fun MensajeScreen(padding: PaddingValues) {
 }
 
 @Composable
-fun MessageItem(profileImage: Int, name: String, message: String) {
+fun MessageItem(navController: NavController, profileImage: Int, name: String, message: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp),
+            .padding(bottom = 16.dp)
+            .clickable {
+                navController.navigate(Screen.Chat.route)
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
