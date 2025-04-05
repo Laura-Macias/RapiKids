@@ -21,6 +21,8 @@ sealed class Screen(val route: String) {
     object Entretenimiento : Screen("entretenimiento")
     object Educacion : Screen("educacion")
     object Chat : Screen("chat")
+    object Contacto : Screen("contacto")
+    object AgregarContacto : Screen("agregarContacto")
 }
 
 @Composable
@@ -36,6 +38,22 @@ fun RapiKidsNavHost() {
                 MenuScreen(navController, padding)
             }
         }
+
+        composable(Screen.Contacto.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                ContactoScreen(navController = navController, padding = padding)
+            }
+        }
+        composable(Screen.AgregarContacto.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                AgregarcontactoScreen(navController = navController, padding = padding)
+            }
+        }
+
         composable(Screen.Chat.route) {
             Scaffold(
                 topBar = { TopBar(navController) }

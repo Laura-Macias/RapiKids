@@ -26,6 +26,13 @@ fun MenuScreen(navController: NavController, padding: PaddingValues) {
                 .clickable { navController.navigate(Screen.Mensaje.route)  }
                 .padding(8.dp)
         )
+        Text(
+            text = "Contactos agregados",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .clickable { navController.navigate(Screen.Contacto.route)  }
+                .padding(8.dp)
+        )
 
         Text(
             text = "Reserva",
@@ -35,12 +42,6 @@ fun MenuScreen(navController: NavController, padding: PaddingValues) {
                 .padding(8.dp)
         )
 
-        Text(
-            text = "chat",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier
-                .clickable { navController.navigate(Screen.Chat.route)  }
-                .padding(8.dp)
-        )
+
     }
 }
