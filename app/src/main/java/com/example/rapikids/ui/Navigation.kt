@@ -18,6 +18,8 @@ sealed class Screen(val route: String) {
     object Menu : Screen("menu")
     object Mensaje : Screen("mensaje")
     object Guardado : Screen("guardado")
+    object Entretenimiento : Screen("entretenimiento")
+    object Educacion : Screen("educacion")
     object Chat : Screen("chat")
 }
 
@@ -27,18 +29,18 @@ fun RapiKidsNavHost() {
 
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
 
-        composable(Screen.Chat.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                ChatScreen(navController, padding)
-            }
-        }
         composable(Screen.Menu.route) {
             Scaffold(
                 topBar = { TopBar(navController) }
             ) { padding ->
                 MenuScreen(navController, padding)
+            }
+        }
+        composable(Screen.Chat.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                ChatScreen(navController, padding)
             }
         }
 
@@ -80,7 +82,20 @@ fun RapiKidsNavHost() {
                 ResumenServicioScreen(navController, padding)
             }
         }
-
+        composable(Screen.Entretenimiento.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                EntretenimientoScreen(navController, padding)
+            }
+        }
+        composable(Screen.Educacion.route) {
+            Scaffold(
+                topBar = { TopBar(navController) }
+            ) { padding ->
+                EducacionScreen(navController, padding)
+            }
+        }
 
         composable(Screen.Splash.route) {
             SplashScreen(navController)

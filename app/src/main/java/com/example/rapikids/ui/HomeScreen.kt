@@ -98,7 +98,7 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
-                onClick = {  },
+                onClick = { navController.navigate(Screen.Entretenimiento.route) },
                 modifier = Modifier
                     .height(60.dp)
                     .width(200.dp),
@@ -138,7 +138,7 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(
-                onClick = {  },
+                onClick = { navController.navigate(Screen.Educacion.route) },
                 modifier = Modifier
                     .height(60.dp)
                     .width(180.dp),
