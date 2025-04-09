@@ -1,4 +1,4 @@
-Rapikids
+# Rapikids
 
 Rapikids es una aplicación que permite buscar guarderías cercanas a la ubicación de la persona en la ciudad de Bogotá, la aplicación permite a los usuarios seleccionar, guarderías cercanas, horarios, servicio que desea adquirir (entretenimiento o educación), costos y métodos de pago.
 
