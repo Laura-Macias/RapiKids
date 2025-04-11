@@ -21,7 +21,7 @@ fun RegisterScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var termsChecked by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableStateOf("Ingresar") }
+    var selectedTab by remember { mutableStateOf("Registrarse") }
 
     Column(
         modifier = Modifier
@@ -130,7 +130,7 @@ fun RegisterScreen(navController: NavHostController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)), // Rosa fuerte
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text("Registarse", color = Color.White)

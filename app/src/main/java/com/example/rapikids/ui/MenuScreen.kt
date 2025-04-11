@@ -41,6 +41,13 @@ fun MenuScreen(navController: NavController, padding: PaddingValues) {
                 .clickable { navController.navigate(Screen.Guardado.route)  }
                 .padding(8.dp)
         )
+        Text(
+            text = "salir",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier
+                .clickable { navController.navigate(Screen.Home.route)  }
+                .padding(8.dp)
+        )
 
 
     }

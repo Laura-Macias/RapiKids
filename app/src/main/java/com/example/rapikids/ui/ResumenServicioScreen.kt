@@ -211,6 +211,13 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                     onDismissRequest = { expanded = false },
                 ) {
                     DropdownMenuItem(
+                        text = { Text("PSE") },
+                        onClick = {
+                            selectedOptionText = "PSE"
+                            expanded = false
+                        }
+                    )
+                    DropdownMenuItem(
                         text = { Text("Tarjeta de crédito") },
                         onClick = {
                             selectedOptionText = "Tarjeta de crédito"
@@ -218,9 +225,9 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Efectivo") },
+                        text = { Text("Tarjeta de débito") },
                         onClick = {
-                            selectedOptionText = "Efectivo"
+                            selectedOptionText = "Tarjeta de débito"
                             expanded = false
                         }
                     )
