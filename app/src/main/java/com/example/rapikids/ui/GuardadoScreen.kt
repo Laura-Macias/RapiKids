@@ -1,12 +1,13 @@
 package com.example.rapikids.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +21,8 @@ import com.example.rapikids.theme.RapiKidsTheme
 
 @Composable
 fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
+    var showPagarDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -123,7 +126,7 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                         Spacer(modifier = Modifier.width(4.dp))
 
                     }
-                    Button(onClick = { }) {
+                    Button(onClick = { showPagarDialog = true }) {
                         Text(text = "Pagar")
                     }
                 }
@@ -150,6 +153,61 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                 color = Color.Gray
             )
         }
+
+
+        if (showPagarDialog) {
+            AlertDialog(
+                onDismissRequest = { showPagarDialog = false },
+                title = { Text("Pago exitoso") },
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_aplauso),
+                            contentDescription = "Aplauso",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ok")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        showPagarDialog = false
+                        navController.navigate("home")
+                    }) {
+                        Text("Aceptar")
+                    }
+                }
+            )
+        }
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun GuardadoScreenPreview() {
+    RapiKidsTheme {
+        GuardadoScreen(padding = PaddingValues(16.dp), navController = rememberNavControllerForPreview())
+    }
+}
+
+
+@Composable
+fun rememberNavControllerForPreview(): NavController {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    return remember {
+        object : NavController(context) {
+            override fun navigate(deepLink: Uri) {
+                val route = ""
+                println("Preview Navigation to: $route")
+            }
+
+            override fun navigateUp(): Boolean {
+                println("Preview Navigate Up")
+                return false
+            }
+        }
+    }
+}
