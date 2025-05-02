@@ -33,7 +33,7 @@ fun RegisterScreen(navController: NavHostController) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
-                painter = painterResource(id = R.drawable.ic_hand_wave_register),
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = "User Icon",
                 modifier = Modifier.size(56.dp)
             )
