@@ -1,5 +1,6 @@
 package com.example.rapikids.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,12 +16,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.tasks.await
 
 @Composable
 fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedTab by remember { mutableStateOf("Ingresar") }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val auth = FirebaseAuth.getInstance()
+
+    fun loginUser() {
+        if (email.isEmpty() || password.isEmpty()) {
+            errorMessage = "Por favor ingresa todos los campos."
+            return
+        }
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    navController.navigate(Screen.Home.route)
+                } else {
+                    errorMessage = "Error de inicio de sesión: ${task.exception?.message}"
+                }
+            }
+    }
 
     Column(
         modifier = Modifier
@@ -29,7 +52,6 @@ fun LoginScreen(navController: NavController) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 painter = painterResource(id = R.drawable.ic_hand_wave),
@@ -44,7 +66,6 @@ fun LoginScreen(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -78,14 +99,12 @@ fun LoginScreen(navController: NavController) {
             }
         }
 
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
                 .background(Color.Gray)
         )
-
 
         Box(
             modifier = Modifier
@@ -115,12 +134,24 @@ fun LoginScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                if (errorMessage.isNotEmpty()) {
+                    Text(
+                        text = errorMessage,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Button(
-                    onClick = { navController.navigate(Screen.Home.route) },
+                    onClick = { loginUser() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)), // Rosa fuerte
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Ingresar", color = Color.White)
@@ -135,7 +166,6 @@ fun LoginScreen(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -156,16 +186,6 @@ fun LoginScreen(navController: NavController) {
                 contentDescription = "Instagram Icon",
                 modifier = Modifier.size(42.dp)
             )
-          /*  Image(
-                painter = painterResource(id = R.drawable.group1),
-                contentDescription = "Ilustración Infantil",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            )*/
-
         }
     }
 }
-
-

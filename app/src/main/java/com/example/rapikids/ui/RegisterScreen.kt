@@ -1,5 +1,6 @@
 package com.example.rapikids.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.rapikids.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun RegisterScreen(navController: NavHostController) {
@@ -22,6 +25,16 @@ fun RegisterScreen(navController: NavHostController) {
     var password by remember { mutableStateOf("") }
     var termsChecked by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("Registrarse") }
+
+    val auth = FirebaseAuth.getInstance()
+
+    fun saveUserToDatabase(userId: String?, name: String, email: String) {
+        val database = FirebaseDatabase.getInstance().getReference("users")
+        val user = User(name, email)
+        userId?.let {
+            database.child(it).setValue(user)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -44,11 +57,7 @@ fun RegisterScreen(navController: NavHostController) {
             )
         }
 
-
-
-
         Spacer(modifier = Modifier.height(24.dp))
-
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -114,7 +123,6 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
                 checked = termsChecked,
@@ -126,14 +134,37 @@ fun RegisterScreen(navController: NavHostController) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { navController.navigate(Screen.Home.route) },
+            onClick = {
+                if (termsChecked) {
+                    auth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val user = auth.currentUser
+                                saveUserToDatabase(user?.uid, name, email)
+                                navController.navigate(Screen.Home.route)
+                            } else {
+                                Toast.makeText(
+                                    navController.context,
+                                    "Error: ${task.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                } else {
+                    Toast.makeText(
+                        navController.context,
+                        "Debes aceptar los términos y condiciones",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Registarse", color = Color.White)
+            Text("Registrarse", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -142,7 +173,6 @@ fun RegisterScreen(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-       
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -165,3 +195,5 @@ fun RegisterScreen(navController: NavHostController) {
         }
     }
 }
+
+data class User(val name: String, val email: String)
