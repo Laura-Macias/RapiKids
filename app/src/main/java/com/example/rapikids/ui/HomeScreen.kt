@@ -156,11 +156,3 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
         }
     }
 }
-
-
-
-
-
-
-
-
