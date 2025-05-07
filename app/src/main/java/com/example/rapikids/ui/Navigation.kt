@@ -23,6 +23,7 @@ sealed class Screen(val route: String) {
     object Chat : Screen("chat")
     object Contacto : Screen("contacto")
     object AgregarContacto : Screen("agregarContacto")
+    object RecuperarContrasena : Screen("recuperarContrasena")
 }
 
 @Composable
@@ -126,5 +127,10 @@ fun RapiKidsNavHost() {
         composable(Screen.Register.route) {
             RegisterScreen(navController)
         }
+
+        composable(Screen.RecuperarContrasena.route) {
+            RecuperarContrasenaScreen(navController)
+        }
+
     }
 }
