@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -143,11 +142,20 @@ fun RegisterScreen(navController: NavHostController) {
                                 saveUserToDatabase(user?.uid, name, email)
                                 navController.navigate(Screen.Home.route)
                             } else {
-                                Toast.makeText(
-                                    navController.context,
-                                    "Error: ${task.exception?.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                val errorMessage = task.exception?.message ?: "Error desconocido"
+                                if (errorMessage.contains("The email address is already in use")) {
+                                    Toast.makeText(
+                                        navController.context,
+                                        "El correo electrónico ya está registrado",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    Toast.makeText(
+                                        navController.context,
+                                        "Error: $errorMessage",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                         }
                 } else {

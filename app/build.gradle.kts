@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.gms.google-services")
+    id("kotlin-android")
 }
 
 android {
@@ -27,6 +28,10 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+
+        }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -69,6 +74,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.0.5")
     implementation("com.google.android.material:material:1.6.0")
     implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
 
 }
 

@@ -1,6 +1,12 @@
 package com.example.rapikids.ui
 
+import android.app.Activity
+import android.content.Intent
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,24 +16,85 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.tasks.await
+import com.google.firebase.database.ValueEventListener
 
 @Composable
 fun LoginScreen(navController: NavController) {
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance().getReference("users")
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var selectedTab by remember { mutableStateOf("Ingresar") }
     var errorMessage by remember { mutableStateOf("") }
+    var isLoggingInWithGoogle by remember { mutableStateOf(false) }
 
-    val auth = FirebaseAuth.getInstance()
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken("106742159318252340163")
+        .requestEmail()
+        .build()
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+            isLoggingInWithGoogle = true
+            auth.signInWithCredential(credential)
+                .addOnCompleteListener { authResult ->
+                    if (authResult.isSuccessful) {
+                        account.email?.let { googleEmail ->
+                            database.orderByChild("email").equalTo(googleEmail)
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        isLoggingInWithGoogle = false
+                                        if (snapshot.exists()) {
+                                            navController.navigate(Screen.Home.route)
+                                        } else {
+                                            errorMessage = "Esta cuenta de Google no está registrada. Por favor regístrate primero."
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        isLoggingInWithGoogle = false
+                                        errorMessage = "Error al verificar el registro: ${error.message}"
+                                        Log.e("LoginScreen", "Error al leer de la base de datos", error.toException())
+                                    }
+                                })
+                        } ?: run {
+                            isLoggingInWithGoogle = false
+                            errorMessage = "No se pudo obtener el correo electrónico de la cuenta de Google."
+                        }
+                    } else {
+                        isLoggingInWithGoogle = false
+                        errorMessage = "Error de inicio con Google: ${authResult.exception?.message}"
+                    }
+                }
+        } catch (e: Exception) {
+            isLoggingInWithGoogle = false
+            errorMessage = "Error de autenticación con Google: ${e.localizedMessage}"
+        }
+    }
 
     fun loginUser() {
         if (email.isEmpty() || password.isEmpty()) {
@@ -60,7 +127,7 @@ fun LoginScreen(navController: NavController) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "¡Que bueno verte de nuevo!",
+                text = "¡Qué bueno verte de nuevo!",
                 style = MaterialTheme.typography.headlineMedium
             )
         }
@@ -113,7 +180,7 @@ fun LoginScreen(navController: NavController) {
                 .background(Color.White, shape = RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
-            Column {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -152,42 +219,60 @@ fun LoginScreen(navController: NavController) {
                         .fillMaxWidth()
                         .height(48.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD81B60)),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    enabled = !isLoggingInWithGoogle
                 ) {
                     Text("Ingresar", color = Color.White)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TextButton(onClick = {
-                    navController.navigate(Screen.RecuperarContrasena.route)
-                }) {
+                TextButton(
+                    onClick = {
+                        navController.navigate(Screen.RecuperarContrasena.route)
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
                     Text("¿Olvidaste tu contraseña?", color = Color(0xFFD81B60))
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        googleSignInClient.signOut().addOnCompleteListener {
+                            val signInIntent = googleSignInClient.signInIntent
+                            launcher.launch(signInIntent)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.LightGray),
+                    elevation = ButtonDefaults.buttonElevation(4.dp),
+                    enabled = !isLoggingInWithGoogle
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = "Login con Google",
+                            modifier = Modifier.size(240.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+                }
+
+                if (isLoggingInWithGoogle) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    CircularProgressIndicator()
+                }
             }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_facebook),
-                contentDescription = "Facebook Icon",
-                modifier = Modifier.size(42.dp)
-            )
-            Image(
-                painter = painterResource(id = R.drawable.ic_email),
-                contentDescription = "Email Icon",
-                modifier = Modifier.size(42.dp)
-            )
-            Image(
-                painter = painterResource(id = R.drawable.ic_instagram),
-                contentDescription = "Instagram Icon",
-                modifier = Modifier.size(42.dp)
-            )
         }
     }
 }
