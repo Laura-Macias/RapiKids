@@ -12,11 +12,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
-import com.example.rapikids.ui.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController) {
+fun TopBar(navController: NavController, onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
             Row(
@@ -35,12 +34,11 @@ fun TopBar(navController: NavController) {
                     text = "RapiKids",
                     fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.primary,
-
                 )
             }
         },
         navigationIcon = {
-            IconButton(onClick = { navController.navigate(Screen.Menu.route) }) {
+            IconButton(onClick = { onMenuClick() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_menu),
                     contentDescription = "Menú",
@@ -51,6 +49,5 @@ fun TopBar(navController: NavController) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0xFFD980FA)
         )
-
     )
 }

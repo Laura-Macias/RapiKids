@@ -1,12 +1,15 @@
 package com.example.rapikids.ui
 
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.material3.*
+import com.example.rapikids.ui.components.DrawerContent
 import com.example.rapikids.ui.components.TopBar
 import com.example.rapikids.ui.screens.*
+import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
@@ -15,7 +18,6 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Reservas : Screen("reservas")
     object ResumenServicio : Screen("resumenServicio")
-    object Menu : Screen("menu")
     object Mensaje : Screen("mensaje")
     object Guardado : Screen("guardado")
     object Entretenimiento : Screen("entretenimiento")
@@ -23,114 +25,122 @@ sealed class Screen(val route: String) {
     object Chat : Screen("chat")
     object Contacto : Screen("contacto")
     object AgregarContacto : Screen("agregarContacto")
+    object Menu : Screen("menu")
     object RecuperarContrasena : Screen("recuperarContrasena")
+
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RapiKidsNavHost() {
     val navController = rememberNavController()
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    NavHost(navController = navController, startDestination = Screen.Splash.route) {
-
-        composable(Screen.Menu.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                MenuScreen(navController, padding)
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                DrawerContent(
+                    onItemClick = { screen ->
+                        scope.launch { drawerState.close() }
+                        navController.navigate(screen.route)
+                    }
+                )
             }
         }
+    ) {
+        NavHost(navController = navController, startDestination = Screen.Splash.route) {
+            composable(Screen.Contacto.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    ContactoScreen(navController = navController, padding = padding)
+                }
+            }
+            composable(Screen.AgregarContacto.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    AgregarcontactoScreen(navController = navController, padding = padding)
+                }
+            }
 
-        composable(Screen.Contacto.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                ContactoScreen(navController = navController, padding = padding)
+            composable(Screen.Chat.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    ChatScreen(navController, padding)
+                }
+            }
+
+            composable(Screen.Home.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    HomeScreen(navController, padding)
+                }
+            }
+
+            composable(Screen.Reservas.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    ReservasScreen(navController, padding)
+                }
+            }
+
+            composable(Screen.Mensaje.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    MensajeScreen(navController = navController, padding = padding)
+                }
+            }
+
+            composable(Screen.Guardado.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    GuardadoScreen(padding, navController)
+                }
+            }
+            composable(Screen.ResumenServicio.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    ResumenServicioScreen(navController, padding)
+                }
+            }
+            composable(Screen.Entretenimiento.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    EntretenimientoScreen(navController, padding)
+                }
+            }
+            composable(Screen.Educacion.route) {
+                Scaffold(
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                ) { padding ->
+                    EducacionScreen(navController, padding)
+                }
+            }
+
+            composable(Screen.Splash.route) {
+                SplashScreen(navController)
+            }
+
+            composable(Screen.Login.route) {
+                LoginScreen(navController)
+            }
+
+            composable(Screen.Register.route) {
+                RegisterScreen(navController)
+            }
+            composable(Screen.RecuperarContrasena.route) {
+                RecuperarContrasenaScreen(navController)
             }
         }
-        composable(Screen.AgregarContacto.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                AgregarcontactoScreen(navController = navController, padding = padding)
-            }
-        }
-
-        composable(Screen.Chat.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                ChatScreen(navController, padding)
-            }
-        }
-
-        composable(Screen.Home.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                HomeScreen(navController, padding)
-            }
-        }
-
-        composable(Screen.Reservas.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                ReservasScreen(navController, padding)
-            }
-        }
-
-        composable(Screen.Mensaje.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                MensajeScreen(navController = navController, padding = padding)
-            }
-        }
-
-        composable(Screen.Guardado.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                GuardadoScreen(padding, navController)
-            }
-        }
-        composable(Screen.ResumenServicio.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                ResumenServicioScreen(navController, padding)
-            }
-        }
-        composable(Screen.Entretenimiento.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                EntretenimientoScreen(navController, padding)
-            }
-        }
-        composable(Screen.Educacion.route) {
-            Scaffold(
-                topBar = { TopBar(navController) }
-            ) { padding ->
-                EducacionScreen(navController, padding)
-            }
-        }
-
-        composable(Screen.Splash.route) {
-            SplashScreen(navController)
-        }
-
-        composable(Screen.Login.route) {
-            LoginScreen(navController)
-        }
-
-        composable(Screen.Register.route) {
-            RegisterScreen(navController)
-        }
-
-        composable(Screen.RecuperarContrasena.route) {
-            RecuperarContrasenaScreen(navController)
-        }
-
     }
 }
