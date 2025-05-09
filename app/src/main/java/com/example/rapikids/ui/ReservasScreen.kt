@@ -1,7 +1,13 @@
 package com.example.rapikids.ui.screens
-
+import android.Manifest
+import android.app.Activity
+import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,14 +17,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.rapikids.R
 import com.example.rapikids.ui.Screen
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import java.util.Calendar
+import android.widget.Toast
 
 @Composable
 fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     val context = LocalContext.current
+    val activity = context as Activity
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val calendar = Calendar.getInstance()
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -31,41 +48,72 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     var educacionSeleccionado by remember { mutableStateOf(false) }
     var horaEntrada by remember { mutableStateOf("") }
     var horaSalida by remember { mutableStateOf("") }
+    var lugarSeleccionado by remember { mutableStateOf("") }
+
+    // Launcher para el Autocomplete
+    val placeLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val place = Autocomplete.getPlaceFromIntent(result.data!!)
+            lugarSeleccionado = "${place.name} - ${place.address}"
+        }
+    }
+
+    // Estado para controlar si se debe lanzar el Autocomplete después de obtener la ubicación
+    var launchAutocomplete by remember { mutableStateOf(false) }
+
+    // Launcher para pedir permiso de ubicación
+    val permisoUbicacionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
+            // Si se concede el permiso, obtener la ubicación y lanzar el Autocomplete
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val fields = listOf(
+                        Place.Field.ID,
+                        Place.Field.NAME,
+                        Place.Field.ADDRESS,
+                        Place.Field.LAT_LNG
+                    )
+                    val bounds = RectangularBounds.newInstance(
+                        LatLng(location.latitude - 0.05, location.longitude - 0.05),
+                        LatLng(location.latitude + 0.05, location.longitude + 0.05)
+                    )
+                    val intent = Autocomplete.IntentBuilder(
+                        AutocompleteActivityMode.FULLSCREEN, fields
+                    )
+                        .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                        .setLocationBias(bounds)
+                        .setCountries(listOf("CO"))
+                        .setHint("Busca jardines o guarderías cercanas")
+                        .build(context)
+                    placeLauncher.launch(intent)
+                } else {
+                    Toast.makeText(context, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(context, "Se necesita permiso de ubicación para buscar guarderías cercanas", Toast.LENGTH_LONG).show()
+        }
+    }
 
     val datePickerDialog = remember {
-        android.app.DatePickerDialog(
-            context,
-            { _, selectedYear, selectedMonth, selectedDay ->
-                fechaSeleccionada = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-            },
-            year,
-            month,
-            day
-        )
+        DatePickerDialog(context, { _, y, m, d ->
+            fechaSeleccionada = "$d/${m + 1}/$y"
+        }, year, month, day)
     }
 
     val timePickerDialogEntrada = remember {
-        TimePickerDialog(
-            context,
-            { _, selectedHour, selectedMinute ->
-                horaEntrada = String.format("%02d:%02d", selectedHour, selectedMinute)
-            },
-            hour,
-            minute,
-            true
-        )
+        TimePickerDialog(context, { _, h, m ->
+            horaEntrada = String.format("%02d:%02d", h, m)
+        }, hour, minute, true)
     }
 
     val timePickerDialogSalida = remember {
-        TimePickerDialog(
-            context,
-            { _, selectedHour, selectedMinute ->
-                horaSalida = String.format("%02d:%02d", selectedHour, selectedMinute)
-            },
-            hour,
-            minute,
-            true
-        )
+        TimePickerDialog(context, { _, h, m ->
+            horaSalida = String.format("%02d:%02d", h, m)
+        }, hour, minute, true)
     }
 
     Column(
@@ -76,31 +124,20 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Escoge la fecha de tu reserva",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Text("Escoge la fecha de tu reserva", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(onClick = { datePickerDialog.show() }) {
-            Text(text = "Seleccionar fecha")
+            Text("Seleccionar fecha")
         }
 
         if (fechaSeleccionada.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Fecha seleccionada: $fechaSeleccionada",
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Text("Fecha seleccionada: $fechaSeleccionada", style = MaterialTheme.typography.bodyLarge)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Que servicio deseas hoy",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Text("¿Qué servicio deseas hoy?", style = MaterialTheme.typography.headlineSmall)
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
@@ -111,8 +148,8 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                 }
             )
             Column {
-                Text(text = "Entretenimiento")
-                Text(text = "Aulas ludicas para diversión", style = MaterialTheme.typography.bodySmall)
+                Text("Entretenimiento")
+                Text("Aulas lúdicas para diversión", style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -125,26 +162,16 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                 }
             )
             Column {
-                Text(text = "Educación")
-                Text(text = "Aulas de repaso y aprendizaje", style = MaterialTheme.typography.bodySmall)
+                Text("Educación")
+                Text("Aulas de repaso y aprendizaje", style = MaterialTheme.typography.bodySmall)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Valor hora: $25.000",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Red
-        )
+        Text("Valor hora: $25.000", color = Color.Red, style = MaterialTheme.typography.bodyLarge)
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Indica la hora",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Text("Indica la hora", style = MaterialTheme.typography.headlineSmall)
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -152,46 +179,87 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                 contentDescription = "Dinosaurio",
                 modifier = Modifier.size(64.dp)
             )
-
             Spacer(modifier = Modifier.width(16.dp))
-
-            Button(onClick = { timePickerDialogEntrada.show() }) {
-                Text(text = "Entrada")
-            }
-
+            Button(onClick = { timePickerDialogEntrada.show() }) { Text("Entrada") }
             Spacer(modifier = Modifier.width(8.dp))
-
-            Button(onClick = { timePickerDialogSalida.show() }) {
-                Text(text = "Salida")
-            }
+            Button(onClick = { timePickerDialogSalida.show() }) { Text("Salida") }
         }
 
         if (horaEntrada.isNotEmpty() || horaSalida.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
-            if (horaEntrada.isNotEmpty()) {
-                Text(text = "Hora de entrada: $horaEntrada")
-            }
-            if (horaSalida.isNotEmpty()) {
-                Text(text = "Hora de salida: $horaSalida")
-            }
+            if (horaEntrada.isNotEmpty()) Text("Hora de entrada: $horaEntrada")
+            if (horaSalida.isNotEmpty()) Text("Hora de salida: $horaSalida")
         }
-        Text(
-            text = "Escoge la guardería",
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-        )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = Modifier.height(24.dp))
+        Text("Escoge la guardería", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // BOTÓN PARA SOLICITAR PERMISO Y LANZAR AUTOCOMPLETE
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    // Verificar permiso
+                    if (ActivityCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // Si el permiso ya está concedido, obtener la ubicación y lanzar el Autocomplete
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                            if (location != null) {
+                                val fields = listOf(
+                                    Place.Field.ID,
+                                    Place.Field.NAME,
+                                    Place.Field.ADDRESS,
+                                    Place.Field.LAT_LNG
+                                )
+                                val bounds = RectangularBounds.newInstance(
+                                    LatLng(location.latitude - 0.05, location.longitude - 0.05),
+                                    LatLng(location.latitude + 0.05, location.longitude + 0.05)
+                                )
+                                val intent = Autocomplete.IntentBuilder(
+                                    AutocompleteActivityMode.FULLSCREEN, fields
+                                )
+                                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                                    .setLocationBias(bounds)
+                                    .setCountries(listOf("CO"))
+                                    .setHint("Busca jardines o guarderías cercanas")
+                                    .build(context)
+                                placeLauncher.launch(intent)
+                            } else {
+                                Toast.makeText(context, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        // Solicitar permiso si no se tiene
+                        permisoUbicacionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    }
+                }
+                .padding(8.dp)
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.ubicacion),
-                contentDescription = "Ubicación",
+                contentDescription = "Ícono ubicación",
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Ubicación actual")
+            Text("Buscar guarderías cercanas", style = MaterialTheme.typography.bodyLarge)
         }
+
+        if (lugarSeleccionado.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Guardería seleccionada: $lugarSeleccionado",
+                color = Color(0xFF4CAF50),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
         Button(
-            onClick = { navController.navigate(Screen.ResumenServicio.route)},
+            onClick = { navController.navigate(Screen.ResumenServicio.route) },
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 16.dp)
@@ -207,5 +275,4 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
             }
         }
     }
-
 }
