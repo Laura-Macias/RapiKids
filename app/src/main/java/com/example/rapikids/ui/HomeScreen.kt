@@ -76,7 +76,7 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "¿Qué quieres hacer hoy?",
+                text = "¿Qué más ofrecemos?",
                 style = MaterialTheme.typography.bodyLarge,
                 fontSize = 25.sp
             )
