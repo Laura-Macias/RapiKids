@@ -1,5 +1,6 @@
 package com.example.rapikids.ui
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,7 +26,7 @@ fun RegisterScreen(navController: NavHostController) {
     var password by remember { mutableStateOf("") }
     var termsChecked by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("Registrarse") }
-
+    val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
 
     fun saveUserToDatabase(userId: String?, name: String, email: String) {
@@ -32,6 +34,15 @@ fun RegisterScreen(navController: NavHostController) {
         val user = User(name, email)
         userId?.let {
             database.child(it).setValue(user)
+                .addOnSuccessListener {
+                    Log.d("RegisterScreen", "User data saved to Realtime Database")
+                    navController.navigate(Screen.Home.route)
+                }
+                .addOnFailureListener { e ->
+                    Log.e("RegisterScreen", "Error saving user data to Realtime Database", e)
+                    Toast.makeText(context, "Error al guardar la información del usuario", Toast.LENGTH_SHORT).show()
+                    auth.currentUser?.delete()
+                }
         }
     }
 
@@ -135,32 +146,36 @@ fun RegisterScreen(navController: NavHostController) {
         Button(
             onClick = {
                 if (termsChecked) {
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val user = auth.currentUser
-                                saveUserToDatabase(user?.uid, name, email)
-                                navController.navigate(Screen.Home.route)
-                            } else {
-                                val errorMessage = task.exception?.message ?: "Error desconocido"
-                                if (errorMessage.contains("The email address is already in use")) {
-                                    Toast.makeText(
-                                        navController.context,
-                                        "El correo electrónico ya está registrado",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                    if (email.isNotBlank() && password.isNotBlank()) {
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val user = auth.currentUser
+                                    saveUserToDatabase(user?.uid, name, email)
                                 } else {
-                                    Toast.makeText(
-                                        navController.context,
-                                        "Error: $errorMessage",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    val errorMessage = task.exception?.message ?: "Error desconocido"
+                                    if (errorMessage.contains("The email address is already in use")) {
+                                        Toast.makeText(
+                                            context,
+                                            "El correo electrónico ya está registrado",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Error: $errorMessage",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        Log.e("RegisterScreen", "Firebase Auth Error: $errorMessage")
+                                    }
                                 }
                             }
-                        }
+                    } else {
+                        Toast.makeText(context, "Por favor, introduce correo y contraseña", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     Toast.makeText(
-                        navController.context,
+                        context,
                         "Debes aceptar los términos y condiciones",
                         Toast.LENGTH_SHORT
                     ).show()
