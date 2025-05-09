@@ -7,6 +7,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -14,6 +16,10 @@ fun AgregarcontactoScreen(navController: NavController, padding: PaddingValues) 
     var nombre by remember { mutableStateOf("") }
     var celular by remember { mutableStateOf("") }
     var parentesco by remember { mutableStateOf("") }
+
+
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
 
     Column(
         modifier = Modifier
@@ -51,7 +57,30 @@ fun AgregarcontactoScreen(navController: NavController, padding: PaddingValues) 
 
         Button(onClick = {
 
-            navController.popBackStack()
+            val userId = auth.currentUser?.uid
+
+            if (userId != null) {
+
+                val contacto = hashMapOf(
+                    "nombre" to nombre,
+                    "celular" to celular,
+                    "parentesco" to parentesco
+                )
+
+
+                database.reference.child("usuarios").child(userId).child("contactos").push()
+                    .setValue(contacto)
+                    .addOnSuccessListener {
+
+                        println("Contacto guardado exitosamente")
+                        navController.popBackStack()
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error al guardar el contacto: $e")
+                    }
+            } else {
+                println("Usuario no autenticado")
+            }
         }) {
             Text("Guardar")
         }
