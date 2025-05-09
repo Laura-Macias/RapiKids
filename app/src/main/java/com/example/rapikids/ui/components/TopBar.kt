@@ -6,16 +6,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(navController: NavController, onMenuClick: () -> Unit) {
+fun TopBar(navController: NavController, onMenuClick: () -> Unit, userName: String) {
     TopAppBar(
         title = {
             Row(
@@ -31,8 +31,8 @@ fun TopBar(navController: NavController, onMenuClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "RapiKids",
-                    fontSize = 28.sp,
+                    text = if (userName.isNotEmpty()) userName else "RapiKids",
+                    fontSize = if (userName.isNotEmpty()) 20.sp else 28.sp,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }

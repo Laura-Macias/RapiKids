@@ -75,6 +75,7 @@ dependencies {
     implementation("com.google.android.material:material:1.6.0")
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
 
 }
 

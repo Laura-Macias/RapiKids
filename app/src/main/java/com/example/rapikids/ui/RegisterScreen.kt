@@ -1,7 +1,5 @@
 package com.example.rapikids.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,8 +30,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
+data class User(val name: String, val email: String)
+
 @Composable
-fun RegisterScreen(navController: NavHostController) {
+fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (String) -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance().getReference("users")
@@ -46,12 +46,14 @@ fun RegisterScreen(navController: NavHostController) {
     var errorMessage by remember { mutableStateOf("") }
     var isRegisteringWithGoogle by remember { mutableStateOf(false) }
 
-    fun saveUserToDatabase(userId: String?, name: String, email: String) {
+    fun saveUserToDatabase(userId: String?, name: String, email: String, onComplete: () -> Unit) {
         val user = User(name, email)
         userId?.let {
             database.child(it).setValue(user)
                 .addOnSuccessListener {
                     Log.d("RegisterScreen", "User data saved to Realtime Database")
+                    onComplete()
+                    onRegistrationSuccess(name)
                     navController.navigate(Screen.Home.route)
                 }
                 .addOnFailureListener { e ->
@@ -89,7 +91,10 @@ fun RegisterScreen(navController: NavHostController) {
                                             errorMessage = "Esta cuenta de Google ya está registrada. Por favor, inicia sesión."
                                         } else {
                                             val newUser = authResult.result?.user
-                                            saveUserToDatabase(newUser?.uid, account.displayName ?: "", googleEmail)
+                                            val googleName = account.displayName ?: ""
+                                            saveUserToDatabase(newUser?.uid, googleName, googleEmail) {
+                                                onRegistrationSuccess(googleName) // Llama al callback
+                                            }
                                         }
                                     }
 
@@ -121,7 +126,9 @@ fun RegisterScreen(navController: NavHostController) {
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             val user = auth.currentUser
-                            saveUserToDatabase(user?.uid, name, email)
+                            saveUserToDatabase(user?.uid, name, email) {
+                                onRegistrationSuccess(name)
+                            }
                         } else {
                             val error = task.exception?.message ?: "Error desconocido"
                             if (error.contains("The email address is already in use")) {
@@ -241,5 +248,3 @@ fun RegisterScreen(navController: NavHostController) {
         }
     }
 }
-
-data class User(val name: String, val email: String)

@@ -27,7 +27,6 @@ sealed class Screen(val route: String) {
     object AgregarContacto : Screen("agregarContacto")
     object Menu : Screen("menu")
     object RecuperarContrasena : Screen("recuperarContrasena")
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +35,7 @@ fun RapiKidsNavHost() {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var userName by remember { mutableStateOf("") }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -53,14 +53,14 @@ fun RapiKidsNavHost() {
         NavHost(navController = navController, startDestination = Screen.Splash.route) {
             composable(Screen.Contacto.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     ContactoScreen(navController = navController, padding = padding)
                 }
             }
             composable(Screen.AgregarContacto.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     AgregarcontactoScreen(navController = navController, padding = padding)
                 }
@@ -68,7 +68,7 @@ fun RapiKidsNavHost() {
 
             composable(Screen.Chat.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     ChatScreen(navController, padding)
                 }
@@ -76,15 +76,15 @@ fun RapiKidsNavHost() {
 
             composable(Screen.Home.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
-                    HomeScreen(navController, padding)
+                    HomeScreen(navController, padding) { name -> userName = name }
                 }
             }
 
             composable(Screen.Reservas.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     ReservasScreen(navController, padding)
                 }
@@ -92,7 +92,7 @@ fun RapiKidsNavHost() {
 
             composable(Screen.Mensaje.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     MensajeScreen(navController = navController, padding = padding)
                 }
@@ -100,28 +100,28 @@ fun RapiKidsNavHost() {
 
             composable(Screen.Guardado.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     GuardadoScreen(padding, navController)
                 }
             }
             composable(Screen.ResumenServicio.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     ResumenServicioScreen(navController, padding)
                 }
             }
             composable(Screen.Entretenimiento.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     EntretenimientoScreen(navController, padding)
                 }
             }
             composable(Screen.Educacion.route) {
                 Scaffold(
-                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }) }
+                    topBar = { TopBar(navController = navController, onMenuClick = { scope.launch { drawerState.open() } }, userName = userName) }
                 ) { padding ->
                     EducacionScreen(navController, padding)
                 }
@@ -132,11 +132,11 @@ fun RapiKidsNavHost() {
             }
 
             composable(Screen.Login.route) {
-                LoginScreen(navController)
+                LoginScreen(navController) { name -> userName = name }
             }
 
             composable(Screen.Register.route) {
-                RegisterScreen(navController)
+                RegisterScreen(navController) { name -> userName = name }
             }
             composable(Screen.RecuperarContrasena.route) {
                 RecuperarContrasenaScreen(navController)

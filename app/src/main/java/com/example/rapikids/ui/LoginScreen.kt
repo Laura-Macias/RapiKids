@@ -1,7 +1,5 @@
 package com.example.rapikids.ui
 
-import android.app.Activity
-import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -34,7 +32,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance().getReference("users")
@@ -69,6 +67,9 @@ fun LoginScreen(navController: NavController) {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         isLoggingInWithGoogle = false
                                         if (snapshot.exists()) {
+                                            val userSnapshot = snapshot.children.first()
+                                            val userName = userSnapshot.child("name").getValue(String::class.java) ?: ""
+                                            onLoginSuccess(userName)
                                             navController.navigate(Screen.Home.route)
                                         } else {
                                             errorMessage = "Esta cuenta de Google no está registrada. Por favor regístrate primero."
@@ -105,7 +106,19 @@ fun LoginScreen(navController: NavController) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    navController.navigate(Screen.Home.route)
+                    database.child(auth.currentUser?.uid ?: "").child("name")
+                        .addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val userName = snapshot.getValue(String::class.java) ?: ""
+                                onLoginSuccess(userName)
+                                navController.navigate(Screen.Home.route)
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                Log.e("LoginScreen", "Error al leer el nombre del usuario", error.toException())
+                                navController.navigate(Screen.Home.route)
+                            }
+                        })
                 } else {
                     errorMessage = "Error de inicio de sesión: ${task.exception?.message}"
                 }

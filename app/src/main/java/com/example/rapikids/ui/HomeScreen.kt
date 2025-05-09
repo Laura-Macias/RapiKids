@@ -13,10 +13,37 @@ import androidx.navigation.NavController
 import com.example.rapikids.R
 import com.example.rapikids.ui.Screen
 import com.example.rapikids.ui.components.AutoPhotoCarousel
-
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 @Composable
-fun HomeScreen(navController: NavController, padding: PaddingValues) {
+fun HomeScreen(navController: NavController, padding: PaddingValues, onUserNameLoaded: (String) -> Unit) {
+    var userName by remember { mutableStateOf("") }
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance().getReference("users")
+
+    LaunchedEffect(key1 = auth.currentUser?.uid) {
+        auth.currentUser?.uid?.let { userId ->
+            database.child(userId).child("name")
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val name = snapshot.getValue(String::class.java) ?: ""
+                        userName = name
+                        onUserNameLoaded(name)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e("HomeScreen", "Error al leer el nombre del usuario", error.toException())
+                        onUserNameLoaded("")
+                    }
+                })
+        } ?: onUserNameLoaded("")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,7 +78,7 @@ fun HomeScreen(navController: NavController, padding: PaddingValues) {
 
 
                 Button(
-                    onClick = {navController.navigate(Screen.Reservas.route) },
+                    onClick = { navController.navigate(Screen.Reservas.route) },
                     modifier = Modifier
                         .width(300.dp)
                         .height(60.dp)
