@@ -31,7 +31,7 @@ data class Reserva(
     val servicio: String = "",
     val guarderia: String = "",
     val metodoPago: String = "",
-    val estadoPago: String? = null // Puede ser null si no se ha pagado
+    val estadoPago: String? = null
 )
 
 @Composable
@@ -58,7 +58,7 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    // Manejar el error de lectura
+
                 }
             })
         }
@@ -70,10 +70,10 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
             reservaRef.child("estadoPago").setValue("pagado")
                 .addOnSuccessListener {
                     showPagarDialog = true
-                    reservaAPagarId = reservaId // Para evitar que se dispare el diálogo múltiples veces
+                    reservaAPagarId = reservaId
                 }
                 .addOnFailureListener {
-                    // Manejar el error al actualizar el estado del pago
+
                 }
         }
     }
