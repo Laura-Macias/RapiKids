@@ -21,12 +21,100 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) {
     var showGuardarDialog by remember { mutableStateOf(false) }
     var showPagarDialog by remember { mutableStateOf(false) }
+
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+    val userId = auth.currentUser?.uid
+
+    var fechaReserva by remember { mutableStateOf("") }
+    var horaEntrada by remember { mutableStateOf("") }
+    var horaSalida by remember { mutableStateOf("") }
+    var servicioSeleccionado by remember { mutableStateOf("") }
+    var guarderiaSeleccionada by remember { mutableStateOf("") }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOptionText by remember { mutableStateOf("Método de pago") }
+
+    LaunchedEffect(key1 = userId) {
+        userId?.let { uid ->
+            val reservasRef = database.reference.child("reservas_temporales").child(uid)
+            reservasRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    fechaReserva = snapshot.child("fechaSeleccionada").getValue(String::class.java) ?: ""
+                    horaEntrada = snapshot.child("horaEntrada").getValue(String::class.java) ?: ""
+                    horaSalida = snapshot.child("horaSalida").getValue(String::class.java) ?: ""
+                    val entretenimiento = snapshot.child("entretenimientoSeleccionado").getValue(Boolean::class.java) ?: false
+                    val educacion = snapshot.child("educacionSeleccionado").getValue(Boolean::class.java) ?: false
+                    servicioSeleccionado = if (entretenimiento) "Entretenimiento" else if (educacion) "Educación" else ""
+                    guarderiaSeleccionada = snapshot.child("lugarSeleccionado").getValue(String::class.java) ?: ""
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+
+                }
+            })
+        }
+    }
+
+
+    fun guardarReservaPermanente() {
+        userId?.let { uid ->
+            val reservasRef = database.reference.child("reservas").child(uid).push()
+            val reservaData = hashMapOf(
+                "fechaReserva" to fechaReserva,
+                "horaEntrada" to horaEntrada,
+                "horaSalida" to horaSalida,
+                "servicio" to servicioSeleccionado,
+                "guarderia" to guarderiaSeleccionada,
+                "metodoPago" to selectedOptionText
+
+            )
+            reservasRef.setValue(reservaData)
+                .addOnSuccessListener {
+
+                    database.reference.child("reservas_temporales").child(uid).removeValue()
+                    showGuardarDialog = true
+                }
+                .addOnFailureListener {
+
+                }
+        }
+    }
+
+
+    fun realizarPago() {
+        userId?.let { uid ->
+            val reservasRef = database.reference.child("reservas").child(uid).push()
+            val reservaData = hashMapOf(
+                "fechaReserva" to fechaReserva,
+                "horaEntrada" to horaEntrada,
+                "horaSalida" to horaSalida,
+                "servicio" to servicioSeleccionado,
+                "guarderia" to guarderiaSeleccionada,
+                "metodoPago" to selectedOptionText,
+                "estadoPago" to "pagado"
+            )
+            reservasRef.setValue(reservaData)
+                .addOnSuccessListener {
+                    database.reference.child("reservas_temporales").child(uid).removeValue()
+                    showPagarDialog = true
+                }
+                .addOnFailureListener {
+
+                }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -85,7 +173,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "6 de Marzo",
+                        text = fechaReserva.ifEmpty { "No seleccionado" },
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
                         color = Color.Blue
@@ -141,7 +229,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                                     fontSize = 18.sp
                                 )
                                 Text(
-                                    text = "6:30 AM",
+                                    text = horaEntrada.ifEmpty { "--:--" },
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 24.sp
                                 )
@@ -162,7 +250,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                                     fontSize = 18.sp
                                 )
                                 Text(
-                                    text = "10:30 AM",
+                                    text = horaSalida.ifEmpty { "--:--" },
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 24.sp
                                 )
@@ -175,8 +263,23 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val tiempoReserva = remember(horaEntrada, horaSalida) {
+            if (horaEntrada.isNotEmpty() && horaSalida.isNotEmpty()) {
+                val entradaParts = horaEntrada.split(":").map { it.toInt() }
+                val salidaParts = horaSalida.split(":").map { it.toInt() }
+                val minutosEntrada = entradaParts[0] * 60 + entradaParts[1]
+                val minutosSalida = salidaParts[0] * 60 + salidaParts[1]
+                val diferenciaMinutos = minutosSalida - minutosEntrada
+                val horas = diferenciaMinutos / 60
+                val minutosRestantes = diferenciaMinutos % 60
+                "TOTAL TIEMPO: ${horas} horas ${if (minutosRestantes > 0) "$minutosRestantes minutos" else ""}"
+            } else {
+                "TOTAL TIEMPO: --"
+            }
+        }
+
         Text(
-            text = "TOTAL TIEMPO: 4 horas",
+            text = tiempoReserva,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp
         )
@@ -192,8 +295,6 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
-            var expanded by remember { mutableStateOf(false) }
-            var selectedOptionText by remember { mutableStateOf("Método de pago") }
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded },
@@ -252,12 +353,12 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Guardería Niños Felices",
+                        text = guarderiaSeleccionada.substringBefore(" - ").ifEmpty { "No seleccionada" },
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
                     Text(
-                        text = "Carrera 18 # 61-67",
+                        text = guarderiaSeleccionada.substringAfter(" - ").ifEmpty { "" },
                         fontSize = 16.sp
                     )
                 }
@@ -265,6 +366,22 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        val valorHora = 25000
+        val horasReserva = remember(horaEntrada, horaSalida) {
+            if (horaEntrada.isNotEmpty() && horaSalida.isNotEmpty()) {
+                val entradaParts = horaEntrada.split(":").map { it.toInt() }
+                val salidaParts = horaSalida.split(":").map { it.toInt() }
+                val minutosEntrada = entradaParts[0] * 60 + entradaParts[1]
+                val minutosSalida = salidaParts[0] * 60 + salidaParts[1]
+                (minutosSalida - minutosEntrada) / 60
+            } else {
+                0
+            }
+        }
+        val totalAPagar = remember(valorHora, horasReserva) {
+            valorHora * horasReserva
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -276,7 +393,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "$45.000",
+                text = "$${totalAPagar}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
                 color = Color(0xFFFFA500)
@@ -290,7 +407,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
-                onClick = { showGuardarDialog = true },
+                onClick = { guardarReservaPermanente() },
                 modifier = Modifier.weight(1f),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color(0xFF008080))
             ) {
@@ -298,7 +415,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = { showPagarDialog = true },
+                onClick = { realizarPago() },
                 modifier = Modifier.weight(1f),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Green)
             ) {

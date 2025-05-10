@@ -17,11 +17,66 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.rapikids.R
 import androidx.navigation.NavController
-import com.example.rapikids.theme.RapiKidsTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+
+data class Reserva(
+    val id: String = "",
+    val fechaReserva: String = "",
+    val horaEntrada: String = "",
+    val horaSalida: String = "",
+    val servicio: String = "",
+    val guarderia: String = "",
+    val metodoPago: String = "",
+    val estadoPago: String? = null // Puede ser null si no se ha pagado
+)
 
 @Composable
 fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
     var showPagarDialog by remember { mutableStateOf(false) }
+    var reservaAPagarId by remember { mutableStateOf("") }
+    val reservasGuardadas = remember { mutableStateListOf<Reserva>() }
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+    val userId = auth.currentUser?.uid
+
+    LaunchedEffect(key1 = userId) {
+        userId?.let { uid ->
+            val reservasRef = database.reference.child("reservas").child(uid)
+            reservasRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    reservasGuardadas.clear()
+                    for (reservaSnapshot in snapshot.children) {
+                        val reserva = reservaSnapshot.getValue(Reserva::class.java)
+                        reserva?.let {
+                            reservasGuardadas.add(it.copy(id = reservaSnapshot.key ?: ""))
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Manejar el error de lectura
+                }
+            })
+        }
+    }
+
+    fun pagarReserva(reservaId: String) {
+        userId?.let { uid ->
+            val reservaRef = database.reference.child("reservas").child(uid).child(reservaId)
+            reservaRef.child("estadoPago").setValue("pagado")
+                .addOnSuccessListener {
+                    showPagarDialog = true
+                    reservaAPagarId = reservaId // Para evitar que se dispare el diálogo múltiples veces
+                }
+                .addOnFailureListener {
+                    // Manejar el error al actualizar el estado del pago
+                }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -31,105 +86,21 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Estas son tus reservas guardadas",
+            text = "Estas son tus reservas",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 16.dp),
             fontWeight = FontWeight.Bold
         )
 
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "7 de Mayo 2025",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Icon(Icons.Filled.Edit, contentDescription = "Editar")
-                }
+        if (reservasGuardadas.isEmpty()) {
+            Text("No tienes reservas guardadas.")
+        } else {
+            reservasGuardadas.forEach { reserva ->
+                ReservaItem(reserva = reserva, onPagarClick = {
+                    reservaAPagarId = it
+                    pagarReserva(it)
+                })
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Hora: 9:00 am - 10:00 am")
-                Text(text = "Guardería: Niños felices")
-                Text(text = "Crr. 18 # 45b -09")
-                Text(text = "Servicio: Educación")
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.FavoriteBorder, contentDescription = "Favorito")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Ya se realizó el pago",
-                            color = Color(0xFF2E7D32),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                }
-            }
-        }
-
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "12 de Julio 2025",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Icon(Icons.Filled.Edit, contentDescription = "Editar")
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Hora: 9:00 am - 10:00 am")
-                Text(text = "Guardería: Niños felices")
-                Text(text = "Crr. 18 # 45b -09")
-                Text(text = "Servicio: Educación")
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.FavoriteBorder, contentDescription = "Favorito")
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                    }
-                    Button(onClick = { showPagarDialog = true }) {
-                        Text(text = "Pagar")
-                    }
-                }
             }
         }
 
@@ -144,20 +115,20 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                 contentDescription = "Advertencia",
                 modifier = Modifier.size(24.dp)
             )
-
-
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Las reservas que aun no se han pagado,\nno se tendrán en cuenta",
+                text = "Las reservas que aún no se han pagado,\nno se tendrán en cuenta",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
         }
 
-
-        if (showPagarDialog) {
+        if (showPagarDialog && reservaAPagarId.isNotEmpty()) {
             AlertDialog(
-                onDismissRequest = { showPagarDialog = false },
+                onDismissRequest = {
+                    showPagarDialog = false
+                    reservaAPagarId = ""
+                },
                 title = { Text("Pago exitoso") },
                 text = {
                     Row(
@@ -169,12 +140,13 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
                             modifier = Modifier.size(24.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Ok")
+                        Text("¡Tu pago se ha realizado con éxito!")
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
                         showPagarDialog = false
+                        reservaAPagarId = ""
                         navController.navigate("home")
                     }) {
                         Text("Aceptar")
@@ -185,13 +157,63 @@ fun GuardadoScreen(padding: PaddingValues, navController: NavController) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun GuardadoScreenPreview() {
-    RapiKidsTheme {
-        GuardadoScreen(padding = PaddingValues(16.dp), navController = rememberNavControllerForPreview())
+fun ReservaItem(reserva: Reserva, onPagarClick: (String) -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = reserva.fechaReserva,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Icon(Icons.Filled.Edit, contentDescription = "Editar")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Hora: ${reserva.horaEntrada} - ${reserva.horaSalida}")
+            Text(text = "Guardería: ${reserva.guarderia.substringBefore(" - ")}")
+            Text(text = "${reserva.guarderia.substringAfter(" - ")}")
+            Text(text = "Servicio: ${reserva.servicio}")
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.FavoriteBorder, contentDescription = "Favorito")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    if (reserva.estadoPago == "pagado") {
+                        Text(
+                            text = "Ya se realizó el pago",
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+                if (reserva.estadoPago != "pagado") {
+                    Button(onClick = { onPagarClick(reserva.id) }) {
+                        Text(text = "Pagar")
+                    }
+                }
+            }
+        }
     }
 }
+
 
 
 @Composable
