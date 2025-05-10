@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.rapikids.R
+import com.example.rapikids.ui.FormularioPagoScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -32,6 +33,7 @@ import com.google.firebase.database.ValueEventListener
 fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) {
     var showGuardarDialog by remember { mutableStateOf(false) }
     var showPagarDialog by remember { mutableStateOf(false) }
+    var showFormularioPagoDialog by remember { mutableStateOf(false) }
 
     val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance()
@@ -45,6 +47,12 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
 
     var expanded by remember { mutableStateOf(false) }
     var selectedOptionText by remember { mutableStateOf("Método de pago") }
+
+    // Variables para almacenar los datos de la tarjeta
+    var numeroTarjeta by remember { mutableStateOf("") }
+    var fechaExpiracionTarjeta by remember { mutableStateOf("") }
+    var cvvTarjeta by remember { mutableStateOf("") }
+    var nombreTitularTarjeta by remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = userId) {
         userId?.let { uid ->
@@ -61,7 +69,6 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
                 }
             })
         }
@@ -82,12 +89,10 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             )
             reservasRef.setValue(reservaData)
                 .addOnSuccessListener {
-
                     database.reference.child("reservas_temporales").child(uid).removeValue()
                     showGuardarDialog = true
                 }
                 .addOnFailureListener {
-
                 }
         }
     }
@@ -165,11 +170,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_edit),
-                            contentDescription = "Editar fecha",
-                            modifier = Modifier.size(24.dp)
-                        )
+
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -207,11 +208,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_edit),
-                            contentDescription = "Editar hora",
-                            modifier = Modifier.size(24.dp)
-                        )
+
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Row {
@@ -261,31 +258,6 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        val tiempoReserva = remember(horaEntrada, horaSalida) {
-            if (horaEntrada.isNotEmpty() && horaSalida.isNotEmpty()) {
-                val entradaParts = horaEntrada.split(":").map { it.toInt() }
-                val salidaParts = horaSalida.split(":").map { it.toInt() }
-                val minutosEntrada = entradaParts[0] * 60 + entradaParts[1]
-                val minutosSalida = salidaParts[0] * 60 + salidaParts[1]
-                val diferenciaMinutos = minutosSalida - minutosEntrada
-                val horas = diferenciaMinutos / 60
-                val minutosRestantes = diferenciaMinutos % 60
-                "TOTAL TIEMPO: ${horas} horas ${if (minutosRestantes > 0) "$minutosRestantes minutos" else ""}"
-            } else {
-                "TOTAL TIEMPO: --"
-            }
-        }
-
-        Text(
-            text = tiempoReserva,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -316,6 +288,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                         onClick = {
                             selectedOptionText = "PSE"
                             expanded = false
+                            showFormularioPagoDialog = false
                         }
                     )
                     DropdownMenuItem(
@@ -323,6 +296,7 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                         onClick = {
                             selectedOptionText = "Tarjeta de crédito"
                             expanded = false
+                            showFormularioPagoDialog = true
                         }
                     )
                     DropdownMenuItem(
@@ -330,11 +304,15 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                         onClick = {
                             selectedOptionText = "Tarjeta de débito"
                             expanded = false
+                            showFormularioPagoDialog = true
                         }
                     )
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -415,7 +393,13 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
             }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                onClick = { realizarPago() },
+                onClick = {
+                    if (selectedOptionText == "Tarjeta de crédito" || selectedOptionText == "Tarjeta de débito") {
+                        showFormularioPagoDialog = true
+                    } else {
+                        realizarPago()
+                    }
+                },
                 modifier = Modifier.weight(1f),
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.Green)
             ) {
@@ -472,6 +456,38 @@ fun ResumenServicioScreen(navController: NavController, padding: PaddingValues) 
                         navController.navigate("home")
                     }) {
                         Text("Aceptar")
+                    }
+                }
+            )
+        }
+
+
+        if (showFormularioPagoDialog) {
+            AlertDialog(
+                onDismissRequest = { showFormularioPagoDialog = false },
+                title = { Text("Detalles de pago") },
+                text = {
+                    FormularioPagoScreen(
+                        onDatosTarjetaChange = { numero, fecha, cvv, nombre ->
+                            numeroTarjeta = numero
+                            fechaExpiracionTarjeta = fecha
+                            cvvTarjeta = cvv
+                            nombreTitularTarjeta = nombre
+                        }
+                    )
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        println("Procesando pago con: $numeroTarjeta, $fechaExpiracionTarjeta, $cvvTarjeta, $nombreTitularTarjeta")
+                        realizarPago()
+                        showFormularioPagoDialog = false
+                    }) {
+                        Text("Pagar ahora")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showFormularioPagoDialog = false }) {
+                        Text("Cancelar")
                     }
                 }
             )
