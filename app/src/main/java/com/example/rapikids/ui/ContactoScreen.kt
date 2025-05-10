@@ -3,6 +3,8 @@ package com.example.rapikids.ui.screens
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,7 +16,6 @@ import androidx.navigation.NavController
 import com.example.rapikids.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-
 
 data class Contact(
     val id: String = "",
@@ -36,7 +37,7 @@ fun ContactoScreen(navController: NavController, padding: PaddingValues) {
     LaunchedEffect(key1 = userId) {
         if (userId != null) {
             val contactsRef = database.reference.child("usuarios").child(userId).child("contactos")
-            contactsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            contactsRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val fetchedContacts = mutableListOf<Contact>()
                     for (contactSnapshot in snapshot.children) {
@@ -47,13 +48,26 @@ fun ContactoScreen(navController: NavController, padding: PaddingValues) {
                     }
                     contacts.clear()
                     contacts.addAll(fetchedContacts)
-                    Log.d("ContactoScreen", "Contactos leídos una vez: $contacts")
+                    Log.d("ContactoScreen", "Contactos actualizados: $contacts")
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("ContactoScreen", "Error al leer contactos: ${error.message}")
                 }
             })
+        }
+    }
+
+    fun eliminarContacto(contactId: String) {
+        userId?.let { uid ->
+            val contactsRef = database.reference.child("usuarios").child(uid).child("contactos")
+            contactsRef.child(contactId).removeValue { error, _ ->
+                if (error == null) {
+                    Log.d("ContactoScreen", "Contacto con ID $contactId eliminado.")
+                } else {
+                    Log.e("ContactoScreen", "Error al eliminar contacto con ID $contactId: ${error.message}")
+                }
+            }
         }
     }
 
@@ -75,7 +89,10 @@ fun ContactoScreen(navController: NavController, padding: PaddingValues) {
             Text("No hay contactos guardados.")
         } else {
             contacts.forEach { contact ->
-                ContactItem(contact = contact)
+                ContactItem(
+                    contact = contact,
+                    onDeleteClick = { eliminarContacto(contact.id) }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -87,7 +104,7 @@ fun ContactoScreen(navController: NavController, padding: PaddingValues) {
 }
 
 @Composable
-fun ContactItem(contact: Contact) {
+fun ContactItem(contact: Contact, onDeleteClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,7 +118,8 @@ fun ContactItem(contact: Contact) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f)
         ) {
             Text(text = contact.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Text(
@@ -114,6 +132,12 @@ fun ContactItem(contact: Contact) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = onDeleteClick) {
+            Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Eliminar")
         }
     }
 }
