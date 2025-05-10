@@ -42,6 +42,7 @@ fun RapiKidsNavHost() {
         drawerContent = {
             ModalDrawerSheet {
                 DrawerContent(
+                    navController = navController,
                     onItemClick = { screen ->
                         scope.launch { drawerState.close() }
                         navController.navigate(screen.route)
