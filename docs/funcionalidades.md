@@ -20,4 +20,5 @@ La siguientes es una lista de las funcionalidades disponibles para el usuario de
 16. Guardar la reserva.
 17. Pagar la reserva.
 18. Miral el historial de las reservas en general (guardadas y pagas) en el menu (Reservas guardadas).
+19. Formulario que simula el pago de la reservas (guarda los datos de targeta).
 ...
