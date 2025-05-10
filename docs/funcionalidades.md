@@ -2,16 +2,22 @@
 
 La siguientes es una lista de las funcionalidades disponibles para el usuario de la aplicación:
 
-1. Buscar guarderías cercanas según la ubicación del usuario en la ciudad de Bogotá.
-2. Ver en mapa las opciones disponibles de guarderias cercanas.
-3. Consultar horarios disponibles según el día y el servicio (educación o entretenimiento).
-4. Seleccionar tipo de servicio: entretenimiento o educación.
-5. Verificar precios de cada servicio disponible.
-6. Seleccionar método de pago (tarjeta, PSE, etc.).
-7. Agendar y cancelar reservas según disponibilidad.
-8. Historial de reservas y pagos realizados.
-9. Chat con personal de las guarderías.
-10. Agregar contactos e información.
-11. Eliminar cuenta.
-12. Verificar información sobre que trata cada servicio.
+1. Registarse a traves del formulario (manualmente) ó a través de google (Seleccionando el correo gmail).
+2. Loguearse a traves del formulario (manualmente) ó a través de google (Seleccionando el correo gmail).
+3. Se puede recuperar la contraseña a la hora de loguearse en caso de que se olvide.
+4. Buscar guarderías cercanas según la ubicación del usuario.
+5. Ver una lista de las opciones disponibles de guarderias cercanas.
+6. Poder seleccionar la guarderia que desee el usuario y esta se verá reflejada en la pantalla (nombre y dirección).
+7. Seleccionar tipo de servicio: entretenimiento o educación.
+8. Seleccionar método de pago (tarjeta, PSE, etc.).
+9. Agregar contactos y poder visualizarlos una vez se guarden en contactos.
+10. Eliminar contactos de los que ya se agregaron.
+11. Cerrar sesion.
+12. Eliminar cuenta.
+13. Verificar información sobre que trata cada servicio.
+14. Seleccionar fecha de reserva.
+15. Seleccionar hora de inicio y fin de reserva
+16. Guardar la reserva.
+17. Pagar la reserva.
+18. Miral el historial de las reservas en general (guardadas y pagas) en el menu (Reservas guardadas).
 ...
