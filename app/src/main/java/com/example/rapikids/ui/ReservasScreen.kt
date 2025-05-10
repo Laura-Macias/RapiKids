@@ -1,4 +1,5 @@
 package com.example.rapikids.ui.screens
+
 import android.Manifest
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -21,6 +22,8 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.rapikids.R
 import com.example.rapikids.ui.Screen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
@@ -50,7 +53,11 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     var horaSalida by remember { mutableStateOf("") }
     var lugarSeleccionado by remember { mutableStateOf("") }
 
-    // Launcher para el Autocomplete
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+    val userId = auth.currentUser?.uid
+
+
     val placeLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val place = Autocomplete.getPlaceFromIntent(result.data!!)
@@ -58,16 +65,11 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         }
     }
 
-    // Estado para controlar si se debe lanzar el Autocomplete después de obtener la ubicación
-    var launchAutocomplete by remember { mutableStateOf(false) }
-
-    // Launcher para pedir permiso de ubicación
     val permisoUbicacionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
             Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
-            // Si se concede el permiso, obtener la ubicación y lanzar el Autocomplete
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                 if (location != null) {
                     val fields = listOf(
@@ -114,6 +116,30 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         TimePickerDialog(context, { _, h, m ->
             horaSalida = String.format("%02d:%02d", h, m)
         }, hour, minute, true)
+    }
+
+
+    fun guardarDatosReservaTemporal() {
+        userId?.let { uid ->
+            val reservasRef = database.reference.child("reservas_temporales").child(uid)
+            val reservaData = hashMapOf(
+                "fechaSeleccionada" to fechaSeleccionada,
+                "entretenimientoSeleccionado" to entretenimientoSeleccionado,
+                "educacionSeleccionado" to educacionSeleccionado,
+                "horaEntrada" to horaEntrada,
+                "horaSalida" to horaSalida,
+                "lugarSeleccionado" to lugarSeleccionado
+            )
+            reservasRef.setValue(reservaData)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Datos guardados temporalmente", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Error al guardar datos: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } ?: run {
+            Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Column(
@@ -195,19 +221,17 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         Text("Escoge la guardería", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(8.dp))
 
-        // BOTÓN PARA SOLICITAR PERMISO Y LANZAR AUTOCOMPLETE
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    // Verificar permiso
                     if (ActivityCompat.checkSelfPermission(
                             context,
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-                        // Si el permiso ya está concedido, obtener la ubicación y lanzar el Autocomplete
                         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                             if (location != null) {
                                 val fields = listOf(
@@ -234,7 +258,6 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                             }
                         }
                     } else {
-                        // Solicitar permiso si no se tiene
                         permisoUbicacionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
                 }
@@ -259,7 +282,10 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         }
 
         Button(
-            onClick = { navController.navigate(Screen.ResumenServicio.route) },
+            onClick = {
+                guardarDatosReservaTemporal()
+                navController.navigate(Screen.ResumenServicio.route)
+            },
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 16.dp)
