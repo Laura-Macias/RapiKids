@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "662901884059",
+    "firebase_url": "https://rapikids-2ccbf-default-rtdb.firebaseio.com",
     "project_id": "rapikids-2ccbf",
     "storage_bucket": "rapikids-2ccbf.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.example.rapikids"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "662901884059-iqkjlckvot9odov3ua0gtfejc73lu037.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.rapikids",
+            "certificate_hash": "eb2b947b406867d632decb9a73fdcca75f7b0ed5"
+          }
+        },
+        {
+          "client_id": "662901884059-t6md0s4gn12h8mslese5uf86rsdcun0r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyC8-VcbnbJLg7fbZkqAI-nC1B2WnxlfJnM"
@@ -20,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "662901884059-t6md0s4gn12h8mslese5uf86rsdcun0r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
