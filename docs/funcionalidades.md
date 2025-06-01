@@ -2,8 +2,8 @@
 
 La siguientes es una lista de las funcionalidades disponibles para el usuario de la aplicación:
 
-1. Registarse a traves del formulario (manualmente) ó a través de google (Seleccionando el correo gmail).
-2. Loguearse a traves del formulario (manualmente) ó a través de google (Seleccionando el correo gmail).
+1. Registarse a traves del formulario (manualmente).
+2. Loguearse a traves del formulario (manualmente). 
 3. Se puede recuperar la contraseña a la hora de loguearse en caso de que se olvide.
 4. Buscar guarderías cercanas según la ubicación del usuario.
 5. Ver una lista de las opciones disponibles de guarderias cercanas.
