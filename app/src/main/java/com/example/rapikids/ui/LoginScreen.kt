@@ -30,6 +30,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) {
@@ -209,7 +210,8 @@ fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) 
                     onValueChange = { password = it },
                     label = { Text("Contraseña") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    visualTransformation = PasswordVisualTransformation()
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
