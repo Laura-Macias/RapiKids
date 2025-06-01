@@ -53,7 +53,6 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
     var errorMessage by remember { mutableStateOf("") }
     var isRegisteringWithGoogle by remember { mutableStateOf(false) }
 
-    // Nuevo estado para controlar la visibilidad de la contraseña
     var passwordVisible by remember { mutableStateOf(false) }
 
     fun saveUserToDatabase(userId: String?, name: String, email: String, onComplete: () -> Unit) {
@@ -75,7 +74,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
     }
 
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken("106742159318252340163")
+        .requestIdToken("662901884059-t6md0s4gn12h8mslese5uf86rsdcun0r.apps.googleusercontent.com")
         .requestEmail()
         .build()
     val googleSignInClient = GoogleSignIn.getClient(context, gso)
@@ -103,7 +102,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
                                             val newUser = authResult.result?.user
                                             val googleName = account.displayName ?: ""
                                             saveUserToDatabase(newUser?.uid, googleName, googleEmail) {
-                                                onRegistrationSuccess(googleName) // Llama al callback
+                                                onRegistrationSuccess(googleName)
                                             }
                                         }
                                     }
