@@ -200,19 +200,15 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
         OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campo de contraseña con el "ojito"
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            // Configura el tipo de teclado para contraseña
-            // ¡AQUÍ ESTÁ LA CORRECCIÓN! KeyboardOptions con 'O' mayúscula
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // Ya no necesitas el paquete completo si la importación está ahí
-            // Transforma visualmente la contraseña si passwordVisible es falso
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            // Agrega el ícono del "ojo"
             trailingIcon = {
                 val image = if (passwordVisible)
                     Icons.Filled.Visibility
@@ -221,7 +217,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
                 val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
 
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                    Icon(imageVector = image, contentDescription = description) // contentDescription es el parámetro correcto aquí
+                    Icon(imageVector = image, contentDescription = description)
                 }
             }
         )
@@ -253,7 +249,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("O regístrate con") // Corregido "O registrate con" a "O regístrate con"
+        Text("O regístrate con")
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(

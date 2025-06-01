@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +31,14 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton // Asegúrate de que esta esté importada si no lo está
 
 @Composable
 fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) {
@@ -43,6 +51,9 @@ fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) 
     var selectedTab by remember { mutableStateOf("Ingresar") }
     var errorMessage by remember { mutableStateOf("") }
     var isLoggingInWithGoogle by remember { mutableStateOf(false) }
+
+    // Nuevo estado para controlar la visibilidad de la contraseña
+    var passwordVisible by remember { mutableStateOf(false) }
 
     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestIdToken("106742159318252340163")
@@ -211,7 +222,19 @@ fun LoginScreen(navController: NavController, onLoginSuccess: (String) -> Unit) 
                     label = { Text("Contraseña") },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    visualTransformation = PasswordVisualTransformation()
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        val image = if (passwordVisible)
+                            Icons.Filled.Visibility
+                        else Icons.Filled.VisibilityOff
+
+                        val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(imageVector = image, contentDescription = description)
+                        }
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
