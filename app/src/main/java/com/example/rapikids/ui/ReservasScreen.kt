@@ -5,11 +5,14 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,8 +25,6 @@ import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import com.example.rapikids.R
 import com.example.rapikids.ui.Screen
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
@@ -31,8 +32,9 @@ import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import java.util.Calendar
-import android.widget.Toast
 
 @Composable
 fun ReservasScreen(navController: NavController, padding: PaddingValues) {
@@ -68,31 +70,7 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     ) { isGranted ->
         if (isGranted) {
             Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val fields = listOf(
-                        Place.Field.ID,
-                        Place.Field.NAME,
-                        Place.Field.ADDRESS,
-                        Place.Field.LAT_LNG
-                    )
-                    val bounds = RectangularBounds.newInstance(
-                        LatLng(location.latitude - 0.05, location.longitude - 0.05),
-                        LatLng(location.latitude + 0.05, location.longitude + 0.05)
-                    )
-                    val intent = Autocomplete.IntentBuilder(
-                        AutocompleteActivityMode.FULLSCREEN, fields
-                    )
-                        .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                        .setLocationBias(bounds)
-                        .setCountries(listOf("CO"))
-                        .setHint("Busca jardines o guarderías cercanas")
-                        .build(context)
-                    placeLauncher.launch(intent)
-                } else {
-                    Toast.makeText(context, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-                }
-            }
+            lanzarAutocompleteConUbicacion(fusedLocationClient, placeLauncher, context)
         } else {
             Toast.makeText(context, "Se necesita permiso de ubicación para buscar guarderías cercanas", Toast.LENGTH_LONG).show()
         }
@@ -149,7 +127,8 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -230,31 +209,7 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-                        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                            if (location != null) {
-                                val fields = listOf(
-                                    Place.Field.ID,
-                                    Place.Field.NAME,
-                                    Place.Field.ADDRESS,
-                                    Place.Field.LAT_LNG
-                                )
-                                val bounds = RectangularBounds.newInstance(
-                                    LatLng(location.latitude - 0.05, location.longitude - 0.05),
-                                    LatLng(location.latitude + 0.05, location.longitude + 0.05)
-                                )
-                                val intent = Autocomplete.IntentBuilder(
-                                    AutocompleteActivityMode.FULLSCREEN, fields
-                                )
-                                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                                    .setLocationBias(bounds)
-                                    .setCountries(listOf("CO"))
-                                    .setHint("Busca jardines o guarderías cercanas")
-                                    .build(context)
-                                placeLauncher.launch(intent)
-                            } else {
-                                Toast.makeText(context, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                        lanzarAutocompleteConUbicacion(fusedLocationClient, placeLauncher, context)
                     } else {
                         permisoUbicacionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }
@@ -299,5 +254,33 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                 )
             }
         }
+    }
+}
+
+private fun lanzarAutocompleteConUbicacion(
+    fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient,
+    placeLauncher: androidx.activity.compose.ManagedActivityResultLauncher<android.content.Intent, androidx.activity.result.ActivityResult>,
+    context: android.content.Context
+) {
+    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+            val currentLatLng = LatLng(location.latitude, location.longitude)
+            val bounds = RectangularBounds.newInstance(
+                LatLng(currentLatLng.latitude - 0.03, currentLatLng.longitude - 0.03),
+                LatLng(currentLatLng.latitude + 0.03, currentLatLng.longitude + 0.03)
+            )
+            val intent = Autocomplete.IntentBuilder(
+                AutocompleteActivityMode.OVERLAY,
+                listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS)
+            )
+                .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                .setLocationBias(bounds)
+                .build(context)
+            placeLauncher.launch(intent)
+        } else {
+            Toast.makeText(context, "No se pudo obtener la ubicación actual.", Toast.LENGTH_SHORT).show()
+        }
+    }.addOnFailureListener {
+        Toast.makeText(context, "Error al obtener ubicación: ${it.message}", Toast.LENGTH_SHORT).show()
     }
 }
