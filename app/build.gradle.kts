@@ -79,7 +79,7 @@ dependencies {
     implementation("com.google.android.libraries.places:places:3.2.0")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
     implementation("androidx.fragment:fragment:1.5.7")
 
 }

@@ -8,6 +8,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +35,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import androidx.compose.foundation.text.KeyboardOptions
 
 data class User(val name: String, val email: String)
 
@@ -45,6 +52,9 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
     var selectedTab by remember { mutableStateOf("Registrarse") }
     var errorMessage by remember { mutableStateOf("") }
     var isRegisteringWithGoogle by remember { mutableStateOf(false) }
+
+    // Nuevo estado para controlar la visibilidad de la contraseña
+    var passwordVisible by remember { mutableStateOf(false) }
 
     fun saveUserToDatabase(userId: String?, name: String, email: String, onComplete: () -> Unit) {
         val user = User(name, email)
@@ -189,7 +199,33 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Correo") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Contraseña") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+
+        // Campo de contraseña con el "ojito"
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            // Configura el tipo de teclado para contraseña
+            // ¡AQUÍ ESTÁ LA CORRECCIÓN! KeyboardOptions con 'O' mayúscula
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), // Ya no necesitas el paquete completo si la importación está ahí
+            // Transforma visualmente la contraseña si passwordVisible es falso
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            // Agrega el ícono del "ojo"
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    Icons.Filled.Visibility
+                else Icons.Filled.VisibilityOff
+
+                val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = description) // contentDescription es el parámetro correcto aquí
+                }
+            }
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -217,7 +253,7 @@ fun RegisterScreen(navController: NavHostController, onRegistrationSuccess: (Str
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("O registrate con")
+        Text("O regístrate con") // Corregido "O registrate con" a "O regístrate con"
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
