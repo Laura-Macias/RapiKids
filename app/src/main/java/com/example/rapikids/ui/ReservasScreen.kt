@@ -47,8 +47,7 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     val minute = calendar.get(Calendar.MINUTE)
 
     var fechaSeleccionada by remember { mutableStateOf("") }
-    var entretenimientoSeleccionado by remember { mutableStateOf(false) }
-    var educacionSeleccionado by remember { mutableStateOf(false) }
+    var servicioSeleccionado by remember { mutableStateOf<String?>(null) }
     var horaEntrada by remember { mutableStateOf("") }
     var horaSalida by remember { mutableStateOf("") }
     var lugarSeleccionado by remember { mutableStateOf("") }
@@ -56,7 +55,6 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     val auth = FirebaseAuth.getInstance()
     val database = FirebaseDatabase.getInstance()
     val userId = auth.currentUser?.uid
-
 
     val placeLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -118,14 +116,13 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         }, hour, minute, true)
     }
 
-
     fun guardarDatosReservaTemporal() {
         userId?.let { uid ->
             val reservasRef = database.reference.child("reservas_temporales").child(uid)
             val reservaData = hashMapOf(
                 "fechaSeleccionada" to fechaSeleccionada,
-                "entretenimientoSeleccionado" to entretenimientoSeleccionado,
-                "educacionSeleccionado" to educacionSeleccionado,
+                "entretenimientoSeleccionado" to (servicioSeleccionado == "entretenimiento"),
+                "educacionSeleccionado" to (servicioSeleccionado == "educacion"),
                 "horaEntrada" to horaEntrada,
                 "horaSalida" to horaSalida,
                 "lugarSeleccionado" to lugarSeleccionado
@@ -141,6 +138,12 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
             Toast.makeText(context, "Usuario no autenticado", Toast.LENGTH_SHORT).show()
         }
     }
+
+    val todosLosCamposLlenos = fechaSeleccionada.isNotEmpty() &&
+            servicioSeleccionado != null &&
+            horaEntrada.isNotEmpty() &&
+            horaSalida.isNotEmpty() &&
+            lugarSeleccionado.isNotEmpty()
 
     Column(
         modifier = Modifier
@@ -165,31 +168,27 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
 
         Text("¿Qué servicio deseas hoy?", style = MaterialTheme.typography.headlineSmall)
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = entretenimientoSeleccionado,
-                onCheckedChange = {
-                    entretenimientoSeleccionado = it
-                    if (it) educacionSeleccionado = false
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = servicioSeleccionado == "entretenimiento",
+                    onClick = { servicioSeleccionado = "entretenimiento" }
+                )
+                Column {
+                    Text("Entretenimiento")
+                    Text("Aulas lúdicas para diversión", style = MaterialTheme.typography.bodySmall)
                 }
-            )
-            Column {
-                Text("Entretenimiento")
-                Text("Aulas lúdicas para diversión", style = MaterialTheme.typography.bodySmall)
             }
-        }
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = educacionSeleccionado,
-                onCheckedChange = {
-                    educacionSeleccionado = it
-                    if (it) entretenimientoSeleccionado = false
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = servicioSeleccionado == "educacion",
+                    onClick = { servicioSeleccionado = "educacion" }
+                )
+                Column {
+                    Text("Educación")
+                    Text("Aulas de repaso y aprendizaje", style = MaterialTheme.typography.bodySmall)
                 }
-            )
-            Column {
-                Text("Educación")
-                Text("Aulas de repaso y aprendizaje", style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -220,7 +219,6 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
         Spacer(modifier = Modifier.height(24.dp))
         Text("Escoge la guardería", style = MaterialTheme.typography.headlineSmall)
         Spacer(modifier = Modifier.height(8.dp))
-
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -286,6 +284,7 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
                 guardarDatosReservaTemporal()
                 navController.navigate(Screen.ResumenServicio.route)
             },
+            enabled = todosLosCamposLlenos,
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 16.dp)
