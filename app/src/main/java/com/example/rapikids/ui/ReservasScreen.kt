@@ -1,6 +1,7 @@
 package com.example.rapikids.ui.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
@@ -257,6 +258,7 @@ fun ReservasScreen(navController: NavController, padding: PaddingValues) {
     }
 }
 
+@SuppressLint("MissingPermission")
 private fun lanzarAutocompleteConUbicacion(
     fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient,
     placeLauncher: androidx.activity.compose.ManagedActivityResultLauncher<android.content.Intent, androidx.activity.result.ActivityResult>,
