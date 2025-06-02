@@ -74,13 +74,13 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:21.0.8")
     implementation("com.google.firebase:firebase-database:20.0.5")
     implementation("com.google.android.material:material:1.6.0")
-    implementation("androidx.navigation:navigation-compose:2.8.9")
+    implementation("androidx.navigation:navigation-compose:2.9.0")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
     implementation("com.google.android.libraries.places:places:3.2.0")
     implementation("com.google.android.gms:play-services-maps:18.2.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("androidx.compose.material:material-icons-extended:1.6.7")
-    implementation("androidx.fragment:fragment:1.5.7")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation("androidx.fragment:fragment:1.8.7")
 
 }
